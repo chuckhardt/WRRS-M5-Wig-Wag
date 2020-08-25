@@ -1,6 +1,21 @@
+// ***************************************************
+//
+// WigWag Signal Program
+//
+// This software was developed to operate on an Arduino Uno
+// microprocessor board.  It controls the WRRS Auto WigWag
+// Model #5 at the Southeastern Railway Museum.
+//
+// Author: C. Hardt
+// Date: 04/19/20
+//
+// ****************************************************
+
 #include "Arduino.h"
 #include "ArduinoInit.h"
 #include "WigWag.h"
+
+extern MainMagnet      MainActionControl;
 
 // ***************************************************
 //
@@ -46,3 +61,141 @@ void InitializeArduinoIOpins()
      digitalWrite(kArduinoIOpin13, LOW);
 
 } //endof InitializeArduinoIOpins()
+
+
+// ***************************************************
+//
+// IncrementTask()
+//
+// Increment our task switch index to the next task
+//
+// ****************************************************
+void IncrementTask(eTaskCount& eTaskNum)
+{
+
+    switch (eTaskNum)
+    {
+        case ReadUserInputRightLimit:
+
+            eTaskNum = ReadUserInputLeftLimit;
+            break;
+            
+        case ReadUserInputLeftLimit:
+
+            
+            eTaskNum = ReadUserInputUserSwitch;
+            break;
+
+        case ReadUserInputUserSwitch:
+
+            
+            eTaskNum = CheckMainMagnet;
+            break;
+      
+        case CheckMainMagnet:
+
+            eTaskNum = ReadSerialPort;
+            break;
+    
+        case ReadSerialPort:
+
+            
+            eTaskNum = ReadUserInputRightLimit;
+            break;
+
+        default:
+            eTaskNum = ReadUserInputRightLimit;
+    }         
+           
+  
+} // endof IncrementTask()
+
+
+// *****************************************************************************************
+//
+// LeftMagnetActivate()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// ****************************************************************************************
+void LeftMagnetActivate(void)
+{
+
+    MainActionControl.LeftMagnetActivate();
+  
+} // endof LeftMagnetActivate()
+
+
+// *****************************************************************************************
+//
+// RightMagnetActivate()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// ****************************************************************************************
+void RightMagnetActivate(void)
+{
+
+    MainActionControl.RightMagnetActivate();
+  
+} // endof RightMagnetActivate()
+
+// *****************************************************************************************
+//
+// ActivateMainMagnet()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// ****************************************************************************************
+void ActivateMainMagnet(void)
+{
+
+    MainActionControl.ActivateMainMagnet();
+  
+} // endof ActivateMainMagnet()
+
+// *****************************************************************************************
+//
+// DutyCycleTimer()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// ****************************************************************************************
+void DutyCycleTimer (void)
+{
+    MainActionControl.UpdateDutyCycleDownCount();
+  
+} //endof DutyCycleTimer()
+
+// need to move this out of here, but this just flashes the LED on the main board
+
+
+// *****************************************************************************************
+//
+// LedFlash()
+//
+// We are going to flash the main board LED on and off just to let us know that everthing
+// is running.
+//
+// ****************************************************************************************
+void LedFlash (void)
+{
+    static bool bLEDflashFlag = false;
+
+    // Alternate flashing the main board LED
+    if (bLEDflashFlag == false)
+    {
+        digitalWrite(kStatusLED, HIGH);
+        bLEDflashFlag = true;
+    }
+    else
+    {
+        digitalWrite(kStatusLED, LOW);
+        bLEDflashFlag = false;
+    }
+    
+}  // endof LedFlash()

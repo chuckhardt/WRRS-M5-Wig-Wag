@@ -1,10 +1,32 @@
+// ***************************************************
+//
+// WigWag Signal Program
+//
+// This software was developed to operate on an Arduino Uno
+// microprocessor board.  It controls the WRRS Auto WigWag
+// Model #5 at the Southeastern Railway Museum.
+//
+// Author: C. Hardt
+// Date: 04/19/20
+//
+// ****************************************************
 
 #ifndef MainControl_h
 #define MainControl_h
 
+#include "WigWag.h"
+
 
 #define kMaxOperationalTimeLimt 30000
+#define kMaxWigWagDutyCycle 60
 
+// ****************************************************************************************
+//
+// MainMagnet
+//
+// This class controls all operations of the magnets (on/off, Left/right)
+//
+// ****************************************************************************************
 class MainMagnet
 {
     private:
@@ -13,10 +35,31 @@ class MainMagnet
         long mlExpirationTime;
         bool mbMainMagnetOn;
         bool mbMagnetDirection;   // stores the magnet diredtion, left or right
-
+        long mlDutyCycleTime;
+        bool mbDownCountReached;
+        long mlDutyCycleMaxTime;
 
     public:
 
+    // ****************************************************************************************
+    //
+    // MainMagnet()
+    //
+    // Our Constructor for the class
+    //
+    // ****************************************************************************************
+    MainMagnet(void);
+
+    // ****************************************************************************************
+    //
+    // UpdateDutyCycleDownCount()
+    //
+    // When called our duty cycle down count is decremented.  When we hit 0, the WigWag
+    // can be activated again.
+    //
+    // ****************************************************************************************
+    void UpdateDutyCycleDownCount(void);
+    
     // ****************************************************************************************
     //
     // ActivateMainMagnet()
@@ -28,7 +71,6 @@ class MainMagnet
     // ****************************************************************************************
     void ActivateMainMagnet(void);
     
-    
     // ****************************************************************************************
     //
     // Operations()
@@ -37,9 +79,8 @@ class MainMagnet
     // If it has, main power is dropped out, and Wig-Wag opertion ends.
     //
     // ****************************************************************************************
-    void Operations(char cParseArgList[kMaxCommandsSupported][25]); //, MainMagnet DirectionActionControl);
+    void Operations(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]); 
     
-
     // ****************************************************************************************
     //
     // DeactivateMainMagnet()

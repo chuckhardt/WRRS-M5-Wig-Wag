@@ -4,7 +4,7 @@
 //
 // This software was developed to operate on an Arduino Uno
 // microprocessor board.  It controls the WRRS Auto Wig-Wag
-// Model #5 at the Southeastern Railway Musuem.
+// Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
 // Date: 04/19/20
@@ -14,7 +14,10 @@
 #ifndef WigWag_h
 #define WigWag_h
 
+#define kMaxCommandLenght     10
 #define kMaxCommandsSupported 6
+
+
 
 #define kArduinoIOpin02 2   
 #define kArduinoIOpin03 3
@@ -45,12 +48,11 @@
 
 enum eTaskCount
 {
-    ReadUserInputLeftLimit = 0,
-    ReadUserInputRightLimit = 1,
-    ReadUserInputUserSwitch, 
-    CheckMainMagnet,
-    CheckDirectionMagnet,
-    ReadSerialPort
+    ReadUserInputRightLimit = 0,
+    ReadUserInputLeftLimit = 1,
+    ReadUserInputUserSwitch = 2, 
+    CheckMainMagnet = 3,
+    ReadSerialPort = 4
     
 } ;
 

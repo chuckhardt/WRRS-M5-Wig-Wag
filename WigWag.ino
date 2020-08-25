@@ -4,7 +4,7 @@
 //
 // This software was developed to operate on an Arduino Uno
 // microprocessor board.  It controls the WRRS Auto WigWag
-// Model #5 at the Southeastern Railway Musuem.
+// Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
 // Date: 04/19/20
@@ -21,15 +21,17 @@
 
 
 Timer MainEventTimer;
-int giMainEventTimerID;
+int   giMainEventTimerID;
+int   giDutyCycleEventTimerID;
 
 SerialPortType  SerialMain;
 MainMagnet      MainActionControl;
 
 
-char cParseArgList[kMaxCommandsSupported][25];
+char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght];
 
-eTaskCount iTaskSwitch = ReadUserInputLeftLimit;
+eTaskCount iTaskSwitch = ReadUserInputRightLimit;
+
 
 // ***************************************************
 //
@@ -51,11 +53,12 @@ void setup()
   InitializeArduinoIOpins();
   
   // We are going to start the main loop event timer.
-  // Every time the timer expires, the ThreeColorLightMain() function will be called.
+  // Every time the timer expires, the TaskSwitchMain() function will be called.
   giMainEventTimerID = MainEventTimer.every(25, TaskSwitchMain);
 
-  //Serial.println("");
-  //Serial.println("SRM WRRS Auto Flagman (Wig-Wag) - Ver 1.02");
+  // Every time the timer expires, the DutyCycleTimer() function will be called.
+  giDutyCycleEventTimerID = MainEventTimer.every(1000, DutyCycleTimer);
+ 
 
   // upon boot up, we are going to activate the signal
   MainActionControl.ActivateMainMagnet();
@@ -75,65 +78,21 @@ void setup()
 // ****************************************************
 void loop()
 {
+    // we need to update the timer continiously
     MainEventTimer.update();
+    
     
 }  //endof loop()
 
-
-// *****************************************************************************************
-//
-// LeftMagnetActivate()
-//
-// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
-// problems with the callback function.
-//
-// ****************************************************************************************
-void LeftMagnetActivate(void)
-{
-
-    MainActionControl.LeftMagnetActivate();
-  
-} // endof LeftMagnetActivate()
-
-
-// *****************************************************************************************
-//
-// RightMagnetActivate()
-//
-// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
-// problems with the callback function.
-//
-// ****************************************************************************************
-void RightMagnetActivate(void)
-{
-
-    MainActionControl.RightMagnetActivate();
-  
-} // endof RightMagnetActivate()
-
-// *****************************************************************************************
-//
-// ActivateMainMagnet()
-//
-// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
-// problems with the callback function.
-//
-// ****************************************************************************************
-void ActivateMainMagnet(void)
-{
-
-    MainActionControl.ActivateMainMagnet();
-  
-} // endof ActivateMainMagnet()
 
 
 // *****************************************************************************************
 //
 // TaskSwitchMain()
 //
-// This is the main loop for the Wig-Wag controller. It gets called every xxx ms.   
+// This is the main loop for the WigWag controller. It gets called every xxx ms.   
 // Each time it is called, a different function will be called.  A poor man's
-// operating system.    
+// task switch.    
 //
 // ****************************************************************************************
 void TaskSwitchMain()
@@ -146,53 +105,38 @@ void TaskSwitchMain()
 
     switch (iTaskSwitch)
     {
-        case ReadUserInputRightLimit:
-
-            // read the right limit switch, if actuated, turn on the left magnet (thereby automatically deactivating the right magnet)
+        case ReadUserInputRightLimit:  // read the right limit switch, if actuated, turn on the left magnet
+         
             RightLimitSwitch.ReadSwitch(cParseArgList, &LeftMagnetActivate );
-            iTaskSwitch = ReadUserInputLeftLimit;
             break;
             
-        case ReadUserInputLeftLimit:
+        case ReadUserInputLeftLimit:  // read the left limit switch, if actuated, turn on the right magnet 
 
-            // read the left limit switch, if actuated, turn on the right magnet (thereby automatically deactivating the left magnet)
             LeftLimitSwitch.ReadSwitch (cParseArgList, &RightMagnetActivate ); 
-            iTaskSwitch = ReadUserInputUserSwitch;
             break;
 
-        case ReadUserInputUserSwitch:
-
-            // read the user input (start) switch, if actuated, turn on the main magnet.  This has no affect on the right or left magnets
+        case ReadUserInputUserSwitch:  // read the user input (start) switch, if actuated, turn on the main magnet.
+              
             UserInputSwitch.ReadSwitch (cParseArgList, &ActivateMainMagnet ); 
-            iTaskSwitch = CheckMainMagnet;
             break;
       
-        case CheckMainMagnet:
+        case CheckMainMagnet:         // check to see if we need to turn off the main magnet 
 
             MainActionControl.Operations(cParseArgList);
-            iTaskSwitch = ReadSerialPort;
             break;
     
-        case ReadSerialPort:
+        case ReadSerialPort:         // see if a cmd is queued up to read and take action on it
 
             SerialMain.SerialLoop(cParseArgList);
-            iTaskSwitch = ReadUserInputRightLimit;
-            if (bLEDflashFlag == false)
-            {
-                digitalWrite(kStatusLED, HIGH);
-                bLEDflashFlag = true;
-            }
-            else
-            {
-                digitalWrite(kStatusLED, LOW);
-                bLEDflashFlag = false;
-            }
-                
+            LedFlash();
             break;
 
         default:
-            iTaskSwitch = ReadUserInputRightLimit;
+            IncrementTask (iTaskSwitch);
 
     };
+
+    IncrementTask (iTaskSwitch);
+
 
 }  //endof TaskSwitchMain()

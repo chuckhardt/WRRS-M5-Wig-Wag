@@ -1,3 +1,15 @@
+// ***************************************************
+//
+// WigWag Signal Program
+//
+// This software was developed to operate on an Arduino Uno
+// microprocessor board.  It controls the WRRS Auto WigWag
+// Model #5 at the Southeastern Railway Museum.
+//
+// Author: C. Hardt
+// Date: 04/19/20
+//
+// ****************************************************
 
 #include "Arduino.h"
 #include "ArduinoInit.h"
@@ -75,14 +87,14 @@ UserInput::UserInput(int iSwitchNumber)
 // Read the specified limit or user switch and gets its current state.
 //
 // ****************************************************************************************
-void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callback_func_ptr ptr) 
+void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght], callback_func_ptr ptr) 
 {
 
     static long lPreviousTime = 0;
 
     bool bSwitchState = true;
 
-    long lDwellTime = 100;
+    long lDwellTime = 25;
     long lCurrentTime = 0;
 
     // select the correct switch
@@ -114,7 +126,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callba
         {
             lPreviousTime = millis();
             SetSwitchSequence(SwitchFirstEvent);
-            Serial.println("ReadSwitch() - Switch Seq #1");
+            //Serial.println("ReadSwitch() - Switch Seq #1");
             
         }
 
@@ -124,7 +136,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callba
               // get the current time  
               lCurrentTime = millis();
 
-              Serial.println("ReadSwitch() - Switch Seq #2");
+              //Serial.println("ReadSwitch() - Switch Seq #2");
 
               // if the time has been exceeded, then we have debounced the limit switch
               if (lCurrentTime > lPreviousTime + lDwellTime)
@@ -133,7 +145,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callba
                   // the left limit switch has been tripped
                   SetSwitchSequence(SwitchSecondEvent);
  
-                  Serial.println("ReadSwitch() - Switch Triggered Seq #2");
+                  //Serial.println("ReadSwitch() - Switch Triggered Seq #2");
 
                   // this is where we make the callback that was set when the API was called.
                   // We will call the right/left magnet activation, or activate the main magnet
@@ -142,10 +154,10 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callba
               } // endof lCurrentTime > lPreviousTime
               else
               {
-                  Serial.print("ReadSwitch() - Switch Seq #2 - Time not yet triggered CT: ");
-                  Serial.print(lCurrentTime);
-                  Serial.print(" TT: ");
-                  Serial.println(lPreviousTime);
+                  //Serial.print("ReadSwitch() - Switch Seq #2 - Time not yet triggered CT: ");
+                  //Serial.print(lCurrentTime);
+                  //Serial.print(" TT: ");
+                  //Serial.println(lPreviousTime);
                 
               }
  
@@ -157,8 +169,8 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callba
     // no switches have been triggered, so make sure all switch states are reset
     else
     {
-        if (SwitchSeq == SwitchSecondEvent)
-            Serial.println("ReadSwitch() - Switch Reset");    
+        //if (SwitchSeq == SwitchSecondEvent)
+        //    Serial.println("ReadSwitch() - Switch Reset");    
       
         SetSwitchSequence(SwitchNoEvent);
 

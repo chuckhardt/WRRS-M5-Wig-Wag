@@ -19,7 +19,7 @@ class SerialPortType
       //  parse and determine if we need to act on any of the commands.
       //
       // **************************************************************************
-      void SerialLoop(char cParseArgList[kMaxCommandsSupported][25]); //, MainMagnet *MainController, DirectionMagnet *DirectionControl, UserInput *LeftSwitch, UserInput *RightSwitch, UserInput *UserSwitch);
+      void SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]); //, MainMagnet *MainController, DirectionMagnet *DirectionControl, UserInput *LeftSwitch, UserInput *RightSwitch, UserInput *UserSwitch);
 
       // **************************************************************************
       //  ConvertCmdLineToArrayOfArgs()
@@ -28,7 +28,7 @@ class SerialPortType
       //  arguments.
       //
       // **************************************************************************
-      int  ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][25]);
+      int  ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]);
 
 }; // SerialPortType
 

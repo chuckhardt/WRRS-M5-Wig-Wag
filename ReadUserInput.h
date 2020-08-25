@@ -1,3 +1,15 @@
+// ***************************************************
+//
+// WigWag Signal Program
+//
+// This software was developed to operate on an Arduino Uno
+// microprocessor board.  It controls the WRRS Auto WigWag
+// Model #5 at the Southeastern Railway Museum.
+//
+// Author: C. Hardt
+// Date: 04/19/20
+//
+// ****************************************************
 
 #ifndef ReadUserInput_h
 #define ReadUserInput_h
@@ -77,7 +89,7 @@ class UserInput: public MainMagnet
         // Read the specified limit or user switch and gets its current state.
         //
         // ****************************************************************************************  
-        void ReadSwitch(char cParseArgList[kMaxCommandsSupported][25], callback_func_ptr ptr);  
+        void ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght], callback_func_ptr ptr);  
   
       
 };  // endof UserInput

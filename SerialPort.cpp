@@ -1,3 +1,16 @@
+// ***************************************************
+//
+// WigWag Signal Program
+//
+// This software was developed to operate on an Arduino Uno
+// microprocessor board.  It controls the WRRS Auto WigWag
+// Model #5 at the Southeastern Railway Museum.
+//
+// Author: C. Hardt
+// Date: 04/19/20
+//
+// ****************************************************
+
 #include <stdio.h> 
 #include "Arduino.h"
 #include "ArduinoInit.h"
@@ -18,7 +31,7 @@
 //
 // **************************************************************************
 
-int SerialPortType::ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][25])
+int SerialPortType::ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght])
 {
     char  *cCmdParsedFromCmdLineString;
     int   iCountOfArgsFound = 0;
@@ -105,13 +118,13 @@ int SerialPortType::ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgL
 //
 // **************************************************************************
 
-void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][25])                         
+void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght])                         
 {
     extern int iLightArrayIndex;
     String     sCommand;
-    //char       cParseArgList[kMaxCommandsSupported][25];  
     int        iNumberOfArgFoundOnTheCmdLine; 
     bool       kMatch = false;
+    int        iNewDutyCycle = 0;
 
     // first thing we are going to do, is make sure the array of arguments has been cleared
     for (int x = 0; x < kMaxCommandsSupported;x++)
@@ -160,15 +173,20 @@ void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][25])
                   Serial.println ("CMD: switch - ERROR");    
                
             }
-            
-            
+            else if(kMatch == strcmp(cParseArgList[0],"cycle"))
+            {
+                
+                Serial.print ("CMD: cycle => ");
+                Serial.println( cParseArgList[1]);
+ 
+            }
             
             else if(kMatch == strcmp(cParseArgList[0],"help"))
             {
                 Serial.println ("help - this menu");
                 Serial.println ("  main       activate | deactivate");
-                Serial.println ("  direction  right | left");
                 Serial.println ("  switch     right | left | user");
+                Serial.println ("  cycle      [seconds]");
                 
             }
             

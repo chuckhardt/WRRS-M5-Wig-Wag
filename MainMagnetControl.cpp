@@ -1,9 +1,84 @@
+// ***************************************************
+//
+// WigWag Signal Program
+//
+// This software was developed to operate on an Arduino Uno
+// microprocessor board.  It controls the WRRS Auto WigWag
+// Model #5 at the Southeastern Railway Museum.
+//
+// Author: C. Hardt
+// Date: 04/19/20
+//
+// ****************************************************
+
 #include "Arduino.h"
 #include "ArduinoInit.h"
 #include "WigWag.h"
 #include "MainMagnetControl.h"
 
 #define kMatch 0
+
+
+// ****************************************************************************************
+//
+// MainMagnet()
+//
+// Our Constructor for the class
+//
+// ****************************************************************************************
+MainMagnet::MainMagnet(void)
+{
+    mlDutyCycleTime = 0;
+    mbDownCountReached = false;
+    mlDutyCycleMaxTime = kMaxWigWagDutyCycle;
+    
+} // MainMagnet::MainMagnet()
+
+// ****************************************************************************************
+//
+// UpdateDutyCycleDownCount()
+//
+// When called our duty cycle down count is decremented.  When we hit 0, the WigWag
+// can be activated again.
+//
+// ****************************************************************************************
+void MainMagnet::UpdateDutyCycleDownCount(void)
+{
+
+    // as long as the count is positive, then process 
+    if (mlDutyCycleTime > 0)
+    {
+        if (mlDutyCycleTime > mlDutyCycleMaxTime)
+        {
+            mlDutyCycleTime = mlDutyCycleMaxTime;
+        }
+        
+        mlDutyCycleTime--;
+        mbDownCountReached = false;
+        if (mlDutyCycleTime == 0)
+        {
+            mbDownCountReached = true;
+        }    
+
+        // only print every so often
+        if ((mlDutyCycleTime % 10) == 0)
+        {
+            Serial.print   ("UpdateDutyCycleDownCount() - Seconds Remaining: ");
+            Serial.println (mlDutyCycleTime);
+        }
+    }
+    else
+    {
+        // we only want to print the down count terminated message one time
+        if (mbDownCountReached == true)
+        {
+            Serial.println("UpdateDutyCycleDownCount() - Reactivtion Down Count Reached");
+            mbDownCountReached = false;
+        }
+        
+    }
+    
+} // MainMagnet::UpdateDutyCycleDownCount()
 
 
 // ****************************************************************************************
@@ -15,7 +90,7 @@
 // count until it reaches zero.  When this happens, the magnets are switched off. 
 //
 // ****************************************************************************************
-void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][25] ) //, MainMagnet DirectionActionControl)
+void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght] ) 
 {
     // get the current time, we will use this to see if it is time to shutdown
     mlCurrentTime = millis();
@@ -58,6 +133,16 @@ void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][25] ) //, 
           Serial.println ("CMD: main - ERROR");
 
     }  //endof kMatch    
+    else if (kMatch == strcmp(cParseArgList[0],"cycle"))
+    {
+
+        // if there is a second argument, then it will be the time interval
+        // We are going to change our max duty cycle downcount number to the new  value
+        mlDutyCycleMaxTime = atoi(cParseArgList[1]);
+        //Serial.print ("CMD: cycle => ");
+        //Serial.println (mlDutyCycleMaxTime);
+               
+    }
 
 }  // MainMagnet::Operations(void)
 
@@ -75,20 +160,35 @@ void MainMagnet::ActivateMainMagnet(void)
 
     Serial.println ("ActivateMainMagnet() -- Start Button has been pressed");
 
-    // We will start by getting the CPU time (in ms) at the time this function is called.
-    mlCurrentTime = millis();
+    // We will limit the duty cycle of the WigWag to once operation every xxx seconds
+    // Will probably start with one operation every 10 mins (or 600 seconds)
+    if (mlDutyCycleTime <= 0)
+    {
 
-    // update the expiration time 
-    mlExpirationTime = mlCurrentTime + kMaxOperationalTimeLimt;
-
-    // activate the main (top) magnet.  This magnet stays on until the max time, timer expires 
-    digitalWrite(kMainMagnetControl, true); 
+        // We will start by getting the CPU time (in ms) at the time this function is called.
+        mlCurrentTime = millis();
     
-    // activate the right magnet.  This magnet stays on until we hit the right limit. 
-    digitalWrite(kRightMagnetControl, true); 
+        // update the expiration time 
+        mlExpirationTime = mlCurrentTime + kMaxOperationalTimeLimt;
+    
+        // activate the main (top) magnet.  This magnet stays on until the max time, timer expires 
+        digitalWrite(kMainMagnetControl, true); 
+        
+        // activate the right magnet.  This magnet stays on until we hit the right limit. 
+        digitalWrite(kRightMagnetControl, true); 
+    
+        // set our flag
+        mbMainMagnetOn = true;
 
-    // set our flag
-    mbMainMagnetOn = true;
+        // once the WigWag has been activated, we will wait xxx seconds before we activate again
+        mlDutyCycleTime = mlDutyCycleMaxTime;
+
+    }
+    else
+    {
+        Serial.println ("Duty Cycle Down Count in progress");
+      
+    }
 
 #if 0
     Serial.print   ("ActivateSignal() -- Current Time: ");
@@ -117,9 +217,13 @@ void MainMagnet::DeactivateMainMagnet(void)
     if (mbMainMagnetOn == true)
     {  
         Serial.println ("DeactivateMainMagnet() -- Powering Down...");
+
+        // once the WigWag has been activated, we will wait xxx seconds before we activate again
+        mlDutyCycleTime = mlDutyCycleMaxTime;
     }
       
     mbMainMagnetOn = false;
+ 
 
 } // endof DeactivateMainMagnet()
 
