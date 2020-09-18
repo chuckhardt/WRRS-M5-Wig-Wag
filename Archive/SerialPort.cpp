@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************
@@ -31,6 +30,7 @@
 //  arguments.
 //
 // **************************************************************************
+
 int SerialPortType::ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght])
 {
     char  *cCmdParsedFromCmdLineString;
@@ -117,6 +117,7 @@ int SerialPortType::ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgL
 //  parse and determine if we need to act on any of the commands.
 //
 // **************************************************************************
+
 void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght])                         
 {
     extern int iLightArrayIndex;
@@ -129,6 +130,7 @@ void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCo
     for (int x = 0; x < kMaxCommandsSupported;x++)
         cParseArgList[x][0] = '\0';
 
+
     // Is there any input waiting on the serial port
     if(Serial.available())
     {
@@ -138,11 +140,14 @@ void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCo
         // parse the command line and convert to an array of arguments
         iNumberOfArgFoundOnTheCmdLine = ConvertCmdLineToArrayOfArgs(sCommand, cParseArgList);
 
+
         // if we have at least one cmd line arg, then process this
         if (iNumberOfArgFoundOnTheCmdLine > 0)
         {
+
             if(kMatch == strcmp(cParseArgList[0],"switch"))
             {
+                             
                 // if we have been told so, then set the direction control relay to right
                 if(kMatch == strcmp(cParseArgList[1],"right"))
                 {

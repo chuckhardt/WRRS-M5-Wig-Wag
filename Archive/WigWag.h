@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************
@@ -17,6 +16,8 @@
 
 #define kMaxCommandLenght     10
 #define kMaxCommandsSupported 6
+
+
 
 #define kArduinoIOpin02 2   
 #define kArduinoIOpin03 3
@@ -44,7 +45,7 @@
 #define kStatusLED        kArduinoIOpin13 
 
 
-/*
+
 enum eTaskCount
 {
     ReadUserInputRightLimit = 0,
@@ -54,7 +55,6 @@ enum eTaskCount
     ReadSerialPort = 4
     
 } ;
-*/
 
 // *****************************************************************************************
 //

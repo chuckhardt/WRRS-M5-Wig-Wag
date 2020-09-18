@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************
@@ -95,7 +94,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
 
     bool bSwitchState = true;
 
-    long lDwellTime = 100;
+    long lDwellTime = 25;
     long lCurrentTime = 0;
 
     // select the correct switch

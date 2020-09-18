@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************

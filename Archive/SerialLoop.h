@@ -1,31 +1,13 @@
-// ***************************************************
-//
-// WigWag Signal Program
-//
-// This software was developed to operate on an Arduino Uno
-// microprocessor board.  It controls the WRRS Auto Wig-Wag
-// Model #5 at the Southeastern Railway Museum.
-//
-// Author: C. Hardt
-// Target Platform: Arduino Uno
-// Date: 04/19/20
-//
-// ****************************************************
-
-#ifndef SerialLoop_h
-#define SerialLoop_h
-
 #include "Arduino.h"
 #include "ReadUserInput.h"
 #include "MainMagnetControl.h"
 #include "WigWag.h"
 
-// **************************************************************************
-// SerialPortType
-//
-// Serial Port Class that is used to read and write to from the serial port
-//
-// **************************************************************************
+#ifndef SerialLoop_h
+#define SerialLoop_h
+
+
+
 class SerialPortType 
 {
     public:
@@ -37,7 +19,7 @@ class SerialPortType
       //  parse and determine if we need to act on any of the commands.
       //
       // **************************************************************************
-      void SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]); 
+      void SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]); //, MainMagnet *MainController, DirectionMagnet *DirectionControl, UserInput *LeftSwitch, UserInput *RightSwitch, UserInput *UserSwitch);
 
       // **************************************************************************
       //  ConvertCmdLineToArrayOfArgs()

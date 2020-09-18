@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************
@@ -19,7 +18,7 @@
 #include "SerialLoop.h"
 #include "ReadUserInput.h"
 #include "MainMagnetControl.h"
-#include "taskstate.h"
+
 
 Timer MainEventTimer;
 int   giMainEventTimerID;
@@ -28,9 +27,11 @@ int   giDutyCycleEventTimerID;
 SerialPortType  SerialMain;
 MainMagnet      MainActionControl;
 
+
 char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght];
 
-WigWagTaskStates TaskStates = WigWagTaskStates();
+eTaskCount iTaskSwitch = ReadUserInputRightLimit;
+
 
 // ***************************************************
 //
@@ -58,6 +59,7 @@ void setup()
   // Every time the timer expires, the DutyCycleTimer() function will be called.
   giDutyCycleEventTimerID = MainEventTimer.every(1000, DutyCycleTimer);
  
+
   // upon boot up, we are going to activate the signal
   MainActionControl.ActivateMainMagnet();
   MainActionControl.RightMagnetActivate();
@@ -69,8 +71,8 @@ void setup()
 // loop()
 //
 // This is the main Arduino function that is called once setup()
-// has finished. We are using this loop to kick off our
-// timer.  The timers provide us with a pseudo task switch
+// has finished.   We are using this loop to kick off our
+// timer.  The timers provide us with a pseudo 
 // operating system.
 //
 // ****************************************************
@@ -79,7 +81,10 @@ void loop()
     // we need to update the timer continiously
     MainEventTimer.update();
     
+    
 }  //endof loop()
+
+
 
 // *****************************************************************************************
 //
@@ -98,7 +103,7 @@ void TaskSwitchMain()
     static UserInput  UserInputSwitch(kUserInputSwitch);
     static bool       bLEDflashFlag = false;
 
-    switch (TaskStates.getTaskState())
+    switch (iTaskSwitch)
     {
         case ReadUserInputRightLimit:  // read the right limit switch, if actuated, turn on the left magnet
          
@@ -127,9 +132,11 @@ void TaskSwitchMain()
             break;
 
         default:
-            TaskStates++;
-    }
+            IncrementTask (iTaskSwitch);
 
-    TaskStates++;
+    };
+
+    IncrementTask (iTaskSwitch);
+
 
 }  //endof TaskSwitchMain()

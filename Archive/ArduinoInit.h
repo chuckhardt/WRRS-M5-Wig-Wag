@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************
@@ -18,15 +17,28 @@
 #include "MainMagnetControl.h"
 #include "WigWag.h"
 
-// ****************************************************************************************
+
+
+// ***************************************************
 //
 // InitializeArduinoIOpins()
 //
 // Initializes the IO pins as either input or output.
 // Then sets the outputs their initial state (high or low).
 //
-// ****************************************************************************************
+// ****************************************************
 void InitializeArduinoIOpins();
+
+
+// ***************************************************
+//
+// IncrementTask()
+//
+// Increment our task switch index to the next task
+//
+// ****************************************************
+void IncrementTask(eTaskCount& eTaskNum);
+
 
 // *****************************************************************************************
 //
@@ -35,7 +47,7 @@ void InitializeArduinoIOpins();
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void LeftMagnetActivate(void);
 
 // *****************************************************************************************
@@ -55,7 +67,7 @@ void RightMagnetActivate(void);
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void ActivateMainMagnet(void);
 
 // *****************************************************************************************
@@ -65,7 +77,7 @@ void ActivateMainMagnet(void);
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void DutyCycleTimer (void);
 
 // *****************************************************************************************
@@ -75,7 +87,7 @@ void DutyCycleTimer (void);
 // We are going to flash the main board LED on and off just to let us know that everthing
 // is running.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void LedFlash (void);
 
 #endif

@@ -7,7 +7,6 @@
 // Model #5 at the Southeastern Railway Museum.
 //
 // Author: C. Hardt
-// Target Platform: Arduino Uno
 // Date: 04/19/20
 //
 // ****************************************************
@@ -63,6 +62,55 @@ void InitializeArduinoIOpins()
 
 } //endof InitializeArduinoIOpins()
 
+
+// ***************************************************
+//
+// IncrementTask()
+//
+// Increment our task switch index to the next task
+//
+// ****************************************************
+void IncrementTask(eTaskCount& eTaskNum)
+{
+
+    switch (eTaskNum)
+    {
+        case ReadUserInputRightLimit:
+
+            eTaskNum = ReadUserInputLeftLimit;
+            break;
+            
+        case ReadUserInputLeftLimit:
+
+            
+            eTaskNum = ReadUserInputUserSwitch;
+            break;
+
+        case ReadUserInputUserSwitch:
+
+            
+            eTaskNum = CheckMainMagnet;
+            break;
+      
+        case CheckMainMagnet:
+
+            eTaskNum = ReadSerialPort;
+            break;
+    
+        case ReadSerialPort:
+
+            
+            eTaskNum = ReadUserInputRightLimit;
+            break;
+
+        default:
+            eTaskNum = ReadUserInputRightLimit;
+    }         
+           
+  
+} // endof IncrementTask()
+
+
 // *****************************************************************************************
 //
 // LeftMagnetActivate()
@@ -70,13 +118,14 @@ void InitializeArduinoIOpins()
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void LeftMagnetActivate(void)
 {
 
     MainActionControl.LeftMagnetActivate();
   
 } // endof LeftMagnetActivate()
+
 
 // *****************************************************************************************
 //
@@ -85,7 +134,7 @@ void LeftMagnetActivate(void)
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void RightMagnetActivate(void)
 {
 
@@ -115,12 +164,15 @@ void ActivateMainMagnet(void)
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void DutyCycleTimer (void)
 {
     MainActionControl.UpdateDutyCycleDownCount();
   
 } //endof DutyCycleTimer()
+
+// need to move this out of here, but this just flashes the LED on the main board
+
 
 // *****************************************************************************************
 //
@@ -129,7 +181,7 @@ void DutyCycleTimer (void)
 // We are going to flash the main board LED on and off just to let us know that everthing
 // is running.
 //
-// *****************************************************************************************
+// ****************************************************************************************
 void LedFlash (void)
 {
     static bool bLEDflashFlag = false;
