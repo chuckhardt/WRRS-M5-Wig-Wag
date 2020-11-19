@@ -127,7 +127,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
         {
             lPreviousTime = millis();
             SetSwitchSequence(SwitchFirstEvent);
-            //Serial.println("ReadSwitch() - Switch Seq #1");
+            Serial.println("ReadSwitch() - Switch Seq #1");
             
         }
 
@@ -137,7 +137,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
               // get the current time  
               lCurrentTime = millis();
 
-              //Serial.println("ReadSwitch() - Switch Seq #2");
+              Serial.println("ReadSwitch() - Switch Seq #2");
 
               // if the time has been exceeded, then we have debounced the limit switch
               if (lCurrentTime > lPreviousTime + lDwellTime)
@@ -146,7 +146,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
                   // the left limit switch has been tripped
                   SetSwitchSequence(SwitchSecondEvent);
  
-                  //Serial.println("ReadSwitch() - Switch Triggered Seq #2");
+                  Serial.println("ReadSwitch() - Switch Triggered Seq #2");
 
                   // this is where we make the callback that was set when the API was called.
                   // We will call the right/left magnet activation, or activate the main magnet
@@ -155,10 +155,10 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
               } // endof lCurrentTime > lPreviousTime
               else
               {
-                  //Serial.print("ReadSwitch() - Switch Seq #2 - Time not yet triggered CT: ");
-                  //Serial.print(lCurrentTime);
-                  //Serial.print(" TT: ");
-                  //Serial.println(lPreviousTime);
+                  Serial.print("ReadSwitch() - Switch Seq #2 - Time not yet triggered CT: ");
+                  Serial.print(lCurrentTime);
+                  Serial.print(" TT: ");
+                  Serial.println(lPreviousTime);
                 
               }
  
@@ -170,8 +170,8 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
     // no switches have been triggered, so make sure all switch states are reset
     else
     {
-        //if (SwitchSeq == SwitchSecondEvent)
-        //    Serial.println("ReadSwitch() - Switch Reset");    
+        if (SwitchSeq == SwitchSecondEvent)
+            Serial.println("ReadSwitch() - Switch Reset");    
       
         SetSwitchSequence(SwitchNoEvent);
 
