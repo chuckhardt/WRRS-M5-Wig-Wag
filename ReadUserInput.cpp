@@ -18,9 +18,7 @@
 #include "ReadUserInput.h"
 #include "MainMagnetControl.h"
 
-
 #define kMatch 0
-
 
 // *****************************************************************************************
 //
@@ -76,7 +74,6 @@ UserInput::UserInput(int iSwitchNumber)
         strcpy(mcFirstSerialCmd, "switch");
         strcpy(mcSecondSerialCmd, "user");
     }
-   
   
 }  // endof UserInput()
 
@@ -92,9 +89,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
 {
 
     static long lPreviousTime = 0;
-
     bool bSwitchState = true;
-
     long lDwellTime = 100;
     long lCurrentTime = 0;
 
@@ -106,7 +101,7 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
         bSwitchState = false;
         SetSwitchSequence(SwitchFirstEvent);
         lPreviousTime = 1;
-        Serial.println ("Serial CMD to set switches received");
+        Serial.println (F("Serial CMD to set switches received"));
  
     }  //endof kMatch       
 
@@ -114,8 +109,6 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
     {
         // Read the specified input switches
         bSwitchState  = digitalRead(miSwitchNumber);
-        //Serial.print("ReadSwtich() Switch Number: ");
-        //Serial.println(miSwitchNumber);
     }
  
     // if the switch is triggered (switch is low) then...
@@ -127,7 +120,6 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
         {
             lPreviousTime = millis();
             SetSwitchSequence(SwitchFirstEvent);
-            Serial.println("ReadSwitch() - Switch Seq #1");
             
         }
 
@@ -137,44 +129,48 @@ void UserInput::ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommand
               // get the current time  
               lCurrentTime = millis();
 
-              Serial.println("ReadSwitch() - Switch Seq #2");
+              //Serial.println(F("ReadSwitch() - Switch Seq #2"));
 
               // if the time has been exceeded, then we have debounced the limit switch
-              if (lCurrentTime > lPreviousTime + lDwellTime)
+              if (lCurrentTime > (lPreviousTime + lDwellTime))
               {
+                
                   // Now it is time to notifiy the control mechanism that
                   // the left limit switch has been tripped
                   SetSwitchSequence(SwitchSecondEvent);
- 
-                  Serial.println("ReadSwitch() - Switch Triggered Seq #2");
+  
+                  //Serial.println(F("ReadSwitch() - Initiating Callback()"));
+
+                  if (miSwitchNumber == kRightLimitSwitch)
+                  {
+                      digitalWrite(kLeftLimitLED, LOW);
+                      digitalWrite(kRightLimitLED, HIGH);
+                  }
+                  
+                  if (miSwitchNumber == kLeftLimitSwitch)
+                  {
+                    
+                      digitalWrite(kRightLimitLED, LOW);
+                      digitalWrite(kLeftLimitLED, HIGH);
+                  } 
+                  
 
                   // this is where we make the callback that was set when the API was called.
                   // We will call the right/left magnet activation, or activate the main magnet
                   (ptr)();
+
              
               } // endof lCurrentTime > lPreviousTime
-              else
-              {
-                  Serial.print("ReadSwitch() - Switch Seq #2 - Time not yet triggered CT: ");
-                  Serial.print(lCurrentTime);
-                  Serial.print(" TT: ");
-                  Serial.println(lPreviousTime);
-                
-              }
  
         } // endif SwitchFirstEvent
- 
      
     }  // endif Switch State
     
     // no switches have been triggered, so make sure all switch states are reset
     else
     {
-        if (SwitchSeq == SwitchSecondEvent)
-            Serial.println("ReadSwitch() - Switch Reset");    
       
         SetSwitchSequence(SwitchNoEvent);
-
         lPreviousTime = 0;
       
     }

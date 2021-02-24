@@ -51,48 +51,48 @@ class UserInput: public MainMagnet
   
     public:
 
-        typedef void (*callback_func_ptr)();
-        callback_func_ptr cb_func;
-        
+    typedef void (*callback_func_ptr)();
+    callback_func_ptr cb_func;
+   
 
-        // *****************************************************************************************
-        //
-        // UserInput()
-        //
-        // Our constructor, which takes as its input, the Ardruino IO pin number that it will uses 
-        // when reading in the physical switch data.   
-        //
-        // ****************************************************************************************
-        UserInput(int);
+    // *****************************************************************************************
+    //
+    // UserInput()
+    //
+    // Our constructor, which takes as its input, the Ardruino IO pin number that it will uses 
+    // when reading in the physical switch data.   
+    //
+    // ****************************************************************************************
+    UserInput(int);
 
-        // *****************************************************************************************
-        //
-        // SetSwitchSequence()
-        //
-        // Set the current switch debouncing sequence (1st, or 2nd)
-        //
-        // ****************************************************************************************
-        void SetSwitchSequence(int);
+    // *****************************************************************************************
+    //
+    // SetSwitchSequence()
+    //
+    // Set the current switch debouncing sequence (1st, or 2nd)
+    //
+    // ****************************************************************************************
+    void SetSwitchSequence(int);
 
-        // *****************************************************************************************
-        //
-        // GetSwitchSequence()
-        //
-        // Get the current switch debouncing sequence (1st, or 2nd)
-        //
-        // ****************************************************************************************
-        int  GetSwitchSequence(void);
+    // *****************************************************************************************
+    //
+    // GetSwitchSequence()
+    //
+    // Get the current switch debouncing sequence (1st, or 2nd)
+    //
+    // ****************************************************************************************
+    int  GetSwitchSequence(void);
 
-        // *****************************************************************************************
-        //
-        // ReadSwitch()
-        //
-        // Read the specified limit or user switch and gets its current state.
-        //
-        // ****************************************************************************************  
-        void ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght], callback_func_ptr ptr);  
+    // *****************************************************************************************
+    //
+    // ReadSwitch()
+    //
+    // Read the specified limit or user switch and gets its current state.
+    //
+    // ****************************************************************************************  
+    void ReadSwitch(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght], callback_func_ptr ptr);  
+
   
-      
 };  // endof UserInput
 
 

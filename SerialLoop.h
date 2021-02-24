@@ -30,23 +30,23 @@ class SerialPortType
 {
     public:
 
-      // **************************************************************************
-      //  SerialLoop()
-      //
-      //  If there is data waiting on the serial port, read in the data.  Then 
-      //  parse and determine if we need to act on any of the commands.
-      //
-      // **************************************************************************
-      void SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]); 
+    // **************************************************************************
+    //  SerialLoop()
+    //
+    //  If there is data waiting on the serial port, read in the data.  Then 
+    //  parse and determine if we need to act on any of the commands.
+    //
+    // **************************************************************************
+    void SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]); 
 
-      // **************************************************************************
-      //  ConvertCmdLineToArrayOfArgs()
-      //
-      //  Parse the string returned by serial port and convert it to an array of
-      //  arguments.
-      //
-      // **************************************************************************
-      int  ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]);
+    // **************************************************************************
+    //  ConvertCmdLineToArrayOfArgs()
+    //
+    //  Parse the string returned by serial port and convert it to an array of
+    //  arguments.
+    //
+    // **************************************************************************
+    int  ConvertCmdLineToArrayOfArgs(String sCmdLine, char cParseArgList[kMaxCommandsSupported][kMaxCommandLenght]);
 
 }; // SerialPortType
 

@@ -43,6 +43,7 @@ public:
   void (*callback)(void);
   unsigned long lastEventTime;
   int count;
+  char timerName[5];
 };
 
 #endif

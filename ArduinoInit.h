@@ -30,33 +30,53 @@ void InitializeArduinoIOpins();
 
 // *****************************************************************************************
 //
-// LeftMagnetActivate()
+// LeftMagnetActivateWrapper()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
 // *****************************************************************************************
-void LeftMagnetActivate(void);
+void LeftMagnetActivateWrapper(void);
 
 // *****************************************************************************************
 //
-// RightMagnetActivate()
+// LeftMagnetActivateWrapperTimeout()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// *****************************************************************************************
+void LeftMagnetActivateWrapperTimeout(void);
+
+// *****************************************************************************************
+//
+// RightMagnetActivateWrapper()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
 // ****************************************************************************************
-void RightMagnetActivate(void);
+void RightMagnetActivateWrapper(void);
 
 // *****************************************************************************************
 //
-// ActivateMainMagnet()
+// RightMagnetActivateWrapperTimeout()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// ****************************************************************************************
+void RightMagnetActivateWrapperTimeout(void);
+
+// *****************************************************************************************
+//
+// ActivateMainMagnetWrapper()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
 // *****************************************************************************************
-void ActivateMainMagnet(void);
+void ActivateMainMagnetWrapper(void);
 
 // *****************************************************************************************
 //

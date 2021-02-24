@@ -46,7 +46,7 @@ StateMachine WigWagTaskStates::getTaskState()
 // WigWagTaskStates::operator++(int)
 //
 // Class method which creates an operator increment function.  We will be incrmenting the
-// the task swithc states, using the ++ operation
+// the task switch states, using the ++ operation
 //
 // ******************************************************************************************
 void WigWagTaskStates::operator++(int)

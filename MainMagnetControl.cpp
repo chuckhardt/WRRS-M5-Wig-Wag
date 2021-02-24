@@ -14,10 +14,15 @@
 
 #include "Arduino.h"
 #include "ArduinoInit.h"
+#include "Timer.h"
 #include "WigWag.h"
 #include "MainMagnetControl.h"
 
 #define kMatch 0
+
+extern Timer LeftMagnetEventTimer;
+extern Timer RightMagnetEventTimer;
+extern Timer MainEventTimer;
 
 
 // ****************************************************************************************
@@ -29,9 +34,9 @@
 // ****************************************************************************************
 MainMagnet::MainMagnet(void)
 {
-    mlDutyCycleTime = 0;
-    mbDownCountReached = false;
-    mlDutyCycleMaxTime = kMaxWigWagDutyCycle;
+    mlWigWagRestartInhibitTimeWindow = 0;
+    miLeftDirectionTimerID = -1;
+    miRightDirectionTimerID = -1;
     
 } // MainMagnet::MainMagnet()
 
@@ -39,42 +44,47 @@ MainMagnet::MainMagnet(void)
 //
 // UpdateDutyCycleDownCount()
 //
-// When called our duty cycle down count is decremented.  When we hit 0, the WigWag
-// can be activated again.
+// We want to control the activation duty cycle count.  We will only permit reactivation
+// once the target time has been reached.
 //
 // ****************************************************************************************
-void MainMagnet::UpdateDutyCycleDownCount(void)
+void MainMagnet::UpdateDutyCycleInActiveWindow(void)
 {
 
-    // as long as the count is positive, then process 
-    if (mlDutyCycleTime > 0)
+    static long lLastDutyCyclePrintOut = 0;
+    
+    // get the current time, we will use this to see if it is time to shutdown
+    mlCurrentTime = millis();
+
+    if (lLastDutyCyclePrintOut == 0)
     {
-        if (mlDutyCycleTime > mlDutyCycleMaxTime)
+        lLastDutyCyclePrintOut = mlCurrentTime;
+    }
+    
+    // if the current time is now greater than the Duty Cycle time, then we can allow the 
+    // Wigwag to restart
+    if ( mlCurrentTime > mlWigWagRestartInhibitTimeWindow)
+    {
+         
+        // we only want to print the termal down count message one time.
+        if (mbDownCountReached != true)
         {
-            mlDutyCycleTime = mlDutyCycleMaxTime;
+            Serial.println (F("UpdateDutyCycleDownCount() - Duty Cycle Cool Down Operation Complete... OK to Restart WigWag!"));
         }
         
-        mlDutyCycleTime--;
-        mbDownCountReached = false;
-        if (mlDutyCycleTime == 0)
-        {
-            mbDownCountReached = true;
-        }    
-
-        // only print every so often
-        if ((mlDutyCycleTime % 10) == 0)
-        {
-            Serial.print   ("UpdateDutyCycleDownCount() - Seconds Remaining: ");
-            Serial.println (mlDutyCycleTime);
-        }
+        mbDownCountReached = true;
     }
+    
     else
     {
-        // we only want to print the down count terminated message one time
-        if (mbDownCountReached == true)
+        // we will only print out a message every 10 seconds (10000ms)
+        if(mlCurrentTime > lLastDutyCyclePrintOut + 10000)
         {
-            Serial.println("UpdateDutyCycleDownCount() - Reactivtion Down Count Reached");
-            mbDownCountReached = false;
+          Serial.print (F("UpdateDutyCycleDownCount() - Current Time: "));
+          Serial.print (mlCurrentTime);
+          Serial.print (F(" Restart Activation Time: "));
+          Serial.println (mlWigWagRestartInhibitTimeWindow);
+          lLastDutyCyclePrintOut = mlCurrentTime;
         }
         
     }
@@ -96,17 +106,6 @@ void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][kMaxComman
     // get the current time, we will use this to see if it is time to shutdown
     mlCurrentTime = millis();
 
-#if 0
-    Serial.print   ("Operations() -- CT: ");
-    Serial.print   (mlCurrentTime);
-    Serial.print   (" ET: ");
-    Serial.print   (mlExpirationTime);
-    Serial.print   (" MR State: ");
-    Serial.print   (mbMainMagnetOn);
-    Serial.print   (" DR State: ");
-    Serial.println (GetDirectionMagnetSelection());
-#endif
-
     // if the current time > then the expiration time, then we are done, shut off the main power
     // to the magnents
     if (mlCurrentTime > mlExpirationTime)
@@ -117,21 +116,22 @@ void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][kMaxComman
     // we have a serial override of the main relay control
     if(kMatch == strcmp(cParseArgList[0],"main"))
     {
+        //Serial.println (F("Magnet Opers() - 1A"));
         // if we have been told so, then activate the main relay
         if(kMatch == strcmp(cParseArgList[1],"activate"))
         {
-            //Serial.println ("CMD: direction => activate");
+            Serial.println (F("CMD: direction => activate"));
             ActivateMainMagnet();
         }
 
         // if we have been told so, then deactivate the main relay
         else if(kMatch == strcmp(cParseArgList[1],"deactivate"))
         {
-            //Serial.println ("CMD: direction => deactivate");
+            Serial.println (F("CMD: direction => deactivate"));
             DeactivateMainMagnet();
         }
         else
-          Serial.println ("CMD: main - ERROR");
+            Serial.println (F("CMD: main - ERROR"));
 
     }  //endof kMatch    
     else if (kMatch == strcmp(cParseArgList[0],"cycle"))
@@ -140,11 +140,9 @@ void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][kMaxComman
         // if there is a second argument, then it will be the time interval
         // We are going to change our max duty cycle downcount number to the new  value
         mlDutyCycleMaxTime = atoi(cParseArgList[1]);
-        //Serial.print ("CMD: cycle => ");
-        //Serial.println (mlDutyCycleMaxTime);
                
     }
-
+ 
 }  // MainMagnet::Operations(void)
 
 // ****************************************************************************************
@@ -159,44 +157,52 @@ void MainMagnet::Operations(char cParseArgList[kMaxCommandsSupported][kMaxComman
 void MainMagnet::ActivateMainMagnet(void)
 {
 
-    Serial.println ("ActivateMainMagnet() -- Start Button has been pressed");
-
     // We will limit the duty cycle of the WigWag to once operation every xxx seconds
     // Will probably start with one operation every 10 mins (or 600 seconds)
-    if (mlDutyCycleTime <= 0)
+    if (mbDownCountReached == true)
     {
+
+        //MainEventTimer.Pause();
+
+        Serial.println (F("ActivateMainMagnet() -- Start Button has been pressed"));
+
+        // activate the main (top) magnet.  This magnet stays on until the max time, timer expires 
+        digitalWrite(kMainMagnetControl, true); 
+        
+        // a little inertia compensation
+        // We are just going to engage the left magnet for a second
+        // then the right for a second.  This will get the WigWag
+        // started swinging.   
+        digitalWrite(kLeftMagnetControl, false);
+        delay(1000); 
+        digitalWrite(kRightMagnetControl, true); 
+        delay(1000);
+
+        // set our flag
+        mbMainMagnetOn = true;
 
         // We will start by getting the CPU time (in ms) at the time this function is called.
         mlCurrentTime = millis();
     
         // update the expiration time 
         mlExpirationTime = mlCurrentTime + kMaxOperationalTimeLimt;
-    
-        // activate the main (top) magnet.  This magnet stays on until the max time, timer expires 
-        digitalWrite(kMainMagnetControl, true); 
-        
-        // activate the right magnet.  This magnet stays on until we hit the right limit. 
-        digitalWrite(kRightMagnetControl, true); 
-    
-        // set our flag
-        mbMainMagnetOn = true;
+ 
+        // activate the left magnet.  This magnet stays on until we hit the left limit. 
+        LeftMagnetActivate();
+ 
+        // once the WigWag has been activated, we will wait prevent a re-activation for x seconds
+        // the duty cycle time is x + teh current time.
+        mlWigWagRestartInhibitTimeWindow = kMaxWigWagDutyCycleInActiveDuration + millis();
 
-        // once the WigWag has been activated, we will wait xxx seconds before we activate again
-        mlDutyCycleTime = mlDutyCycleMaxTime;
+        // We need to handle the situation when the time rolls over back to zero.
+        if ((mlWigWagRestartInhibitTimeWindow + millis() ) < mlWigWagRestartInhibitTimeWindow )
+            mlWigWagRestartInhibitTimeWindow = kMaxWigWagDutyCycleInActiveDuration;
+
+        mbDownCountReached = false;
+
+        //MainEventTimer.Resume();
 
     }
-    else
-    {
-        Serial.println ("Duty Cycle Down Count in progress");
-      
-    }
-
-#if 0
-    Serial.print   ("ActivateSignal() -- Current Time: ");
-    Serial.print   (mlCurrentTime);
-    Serial.print   (" Neww Expiration Time: ");
-    Serial.println (mlExpirationTime);
-#endif    
     
 }  // MainMagnet::ActivateMainMagnet(void)
 
@@ -214,17 +220,22 @@ void MainMagnet::DeactivateMainMagnet(void)
     // shut off the main power relay
     digitalWrite(kMainMagnetControl, false); 
 
+    // shut off both the right and left limit LEDs
+    digitalWrite(kRightLimitLED,  LOW);
+    digitalWrite(kLeftLimitLED,   LOW);
+
     // only print one time.
     if (mbMainMagnetOn == true)
     {  
-        Serial.println ("DeactivateMainMagnet() -- Powering Down...");
+        Serial.println (F("DeactivateMainMagnet() -- Powering Down..."));
 
-        // once the WigWag has been activated, we will wait xxx seconds before we activate again
-        mlDutyCycleTime = mlDutyCycleMaxTime;
+        // we need to stop the timer we use to catch problems sensing the left or right limit switch
+        LeftMagnetEventTimer.stop(miLeftDirectionTimerID);
+        RightMagnetEventTimer.stop(miRightDirectionTimerID);
     }
       
     mbMainMagnetOn = false;
- 
+
 
 } // endof DeactivateMainMagnet()
 
@@ -239,16 +250,25 @@ void MainMagnet::DeactivateMainMagnet(void)
 // ****************************************************************************************
 void MainMagnet::RightMagnetActivate(void)
 {
-    // We have one relay (a DPDT), that selects the left or right magnet
-    // We use the DPDT relay, to switch the direction of current thru the two coils (right and left).
-    // So when we deactivate the left magnet, we are actually activating the right magnet.
-
-    Serial.println("RightMagnetActivate() ");
-
-    // activate the direction control DPDT relay     
-    digitalWrite(kRightMagnetControl, true);   
-
-    mbMagnetDirection = true;
+    // We are only going to process right/left commands when the main magnet is on
+    if (mbMainMagnetOn == true)
+    {  
+        Serial.println(F("RightMagnetActivate() "));
+        
+        LeftMagnetEventTimer.stop(miLeftDirectionTimerID);
+         
+        // We have one relay (a DPDT), that selects the left or right magnet
+        // We use the DPDT relay, to switch the direction of current thru the two coils (right and left).
+        // So when we deactivate the left magnet, we are actually activating the right magnet.
+        digitalWrite(kRightMagnetControl, true);   
+    
+        mbMagnetDirection = RIGHT;
+    
+        // we need to set a timeout timer.  If we don't hit the left limit switch in xxx millseconds, 
+        // we will automatically, shut off the right magnet, and activate left magnet
+        miLeftDirectionTimerID = LeftMagnetEventTimer.after("LMA", 2000, LeftMagnetActivateWrapperTimeout);
+ 
+    }
   
 }  // endof RightMagnetActivate()
 
@@ -263,17 +283,26 @@ void MainMagnet::RightMagnetActivate(void)
 // ****************************************************************************************
 void MainMagnet::LeftMagnetActivate(void)
 {
-    // We have one relay (a DPDT), that selects the left or right magnet
-    // We use the DPDT relay, to switch the direction of current thru the two coils (right and left).
-    // So when we deactivate the left magnet, we are actually activating the right magnet.
+    // We are only going to process right/left commands when the main magnet is on
+    if (mbMainMagnetOn == true)
+    { 
+    
+        Serial.println(F("LeftMagnetActivate() "));
 
-    Serial.println("LeftMagnetActivate() ");
-
-    // activate the direction control DPDT relay     
-    digitalWrite(kLeftMagnetControl, false);   
-
-    mbMagnetDirection = false;
-  
+        RightMagnetEventTimer.stop(miRightDirectionTimerID);
+        
+        // We have one relay (a DPDT), that selects the left or right magnet
+        // We use the DPDT relay, to switch the direction of current thru the two coils (right and left).
+        // So when we deactivate the left magnet, we are actually activating the right magnet.
+        digitalWrite(kLeftMagnetControl, false);   
+    
+        mbMagnetDirection = LEFT;
+    
+        // we need to set a timeout timer.  If we don't hit the right limit switch in xxx millseconds, 
+        // we will automatically, shut off the left magnet, and activate right magnet
+        miRightDirectionTimerID = RightMagnetEventTimer.after("RMA", 2000, RightMagnetActivateWrapperTimeout);
+    }
+            
 }  // endof LeftMagnetActivate()
 
 

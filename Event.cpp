@@ -42,6 +42,7 @@ void Event::update(void)
 		switch (eventType)
 		{
 			case EVENT_EVERY:
+        //Serial.println ("Timer Reached!");
 				(*callback)();
 				break;
 
@@ -53,6 +54,7 @@ void Event::update(void)
 		lastEventTime = now;
 		count++;
 	}
+ 
 	if (repeatCount > -1 && count >= repeatCount)
 	{
 		eventType = EVENT_NONE;

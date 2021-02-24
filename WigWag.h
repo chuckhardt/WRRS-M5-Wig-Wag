@@ -41,30 +41,21 @@
 #define kLeftLimitSwitch  kArduinoIOpin03
 #define kUserInputSwitch  kArduinoIOpin04
 
+#define kRightLimitLED    kArduinoIOpin08
+#define kLeftLimitLED     kArduinoIOpin09
+
 #define kStatusLED        kArduinoIOpin13 
 
 
-/*
-enum eTaskCount
-{
-    ReadUserInputRightLimit = 0,
-    ReadUserInputLeftLimit = 1,
-    ReadUserInputUserSwitch = 2, 
-    CheckMainMagnet = 3,
-    ReadSerialPort = 4
-    
-} ;
-*/
-
 // *****************************************************************************************
 //
-// LeftMagnetActivate()
+// LeftMagnetActivatWrappere()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the callback function.
 //
 // ****************************************************************************************
-void LeftMagnetActivate(void);
+void LeftMagnetActivateWrapper(void);
 
 // *****************************************************************************************
 //
@@ -74,18 +65,18 @@ void LeftMagnetActivate(void);
 // problems with the callback function.
 //
 // ****************************************************************************************
-void RightMagnetActivate(void);
+void RightMagnetActivateWrapper(void);
 
 
 // *****************************************************************************************
 //
-// ActivateMainMagnet()
+// ActivateMainMagnetWrapper()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the callback function.
 //
 // ****************************************************************************************
-void ActivateMainMagnet(void);
+void ActivateMainMagnetWrapper(void);
 
 // *****************************************************************************************
 //

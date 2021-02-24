@@ -29,15 +29,15 @@ extern MainMagnet      MainActionControl;
 void InitializeArduinoIOpins()
 {
      // Setup the Arduino pins for input and output.  
-     pinMode(kArduinoIOpin02, INPUT);
-     pinMode(kArduinoIOpin03, INPUT);
-     pinMode(kArduinoIOpin04, INPUT);
-     pinMode(kArduinoIOpin05, OUTPUT);
+     pinMode(kArduinoIOpin02, INPUT);    // Right Limit
+     pinMode(kArduinoIOpin03, INPUT);    // Left Limit
+     pinMode(kArduinoIOpin04, INPUT);    // User Switch
+     pinMode(kArduinoIOpin05, OUTPUT);   // Right/Left Magnet
   
-     pinMode(kArduinoIOpin06, OUTPUT);
+     pinMode(kArduinoIOpin06, OUTPUT);   // Main Magnet
      pinMode(kArduinoIOpin07, OUTPUT);
-     pinMode(kArduinoIOpin08, INPUT);
-     pinMode(kArduinoIOpin09, INPUT);
+     pinMode(kArduinoIOpin08, OUTPUT);   // Left Limit LED
+     pinMode(kArduinoIOpin09, OUTPUT);   // Right Limit LED
      pinMode(kArduinoIOpin10, INPUT);
      pinMode(kArduinoIOpin11, OUTPUT);
      pinMode(kArduinoIOpin12, OUTPUT);
@@ -46,67 +46,88 @@ void InitializeArduinoIOpins()
      pinMode(kArduinoIOpin13, OUTPUT);
 
      // Now set the Inital power up state of all the IO to low
-     //digitalWrite(kArduinoIOpin02, LOW);
-     //digitalWrite(kArduinoIOpin03, LOW);
-     //digitalWrite(kArduinoIOpin04, LOW);
      digitalWrite(kArduinoIOpin05, LOW);
      digitalWrite(kArduinoIOpin06, LOW);
-
-     //digitalWrite(kArduinoIOpin07, LOW);
-     //digitalWrite(kArduinoIOpin08, LOW);
-     //digitalWrite(kArduinoIOpin09, LOW);
-     //digitalWrite(kArduinoIOpin10, LOW);
-     //digitalWrite(kArduinoIOpin11, LOW);
-     //digitalWrite(kArduinoIOpin12, LOW);
-  
+     digitalWrite(kRightLimitLED,  LOW);
+     digitalWrite(kLeftLimitLED,   LOW);
+ 
      digitalWrite(kArduinoIOpin13, LOW);
 
 } //endof InitializeArduinoIOpins()
 
 // *****************************************************************************************
 //
-// LeftMagnetActivate()
+// LeftMagnetActivateWrapper()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
 // *****************************************************************************************
-void LeftMagnetActivate(void)
+void LeftMagnetActivateWrapper(void)
 {
 
     MainActionControl.LeftMagnetActivate();
   
-} // endof LeftMagnetActivate()
+} // endof LeftMagnetActivateWrapper()
 
 // *****************************************************************************************
 //
-// RightMagnetActivate()
+// LeftMagnetActivateWrapperTimeout()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
 // *****************************************************************************************
-void RightMagnetActivate(void)
+void LeftMagnetActivateWrapperTimeout(void)
+{
+    Serial.print (F("Timeout waiting for the right Limt... "));
+    MainActionControl.LeftMagnetActivate();
+  
+} // endof LeftMagnetActivateWrapperTimeout()
+
+// *****************************************************************************************
+//
+// RightMagnetActivateWrapper()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// *****************************************************************************************
+void RightMagnetActivateWrapper(void)
 {
 
     MainActionControl.RightMagnetActivate();
   
-} // endof RightMagnetActivate()
+} // endof RightMagnetActivateWrapper()
 
 // *****************************************************************************************
 //
-// ActivateMainMagnet()
+// RightMagnetActivateWrapperTimeout()
+//
+// This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
+// problems with the way Arduino handles callback functions.
+//
+// *****************************************************************************************
+void RightMagnetActivateWrapperTimeout(void)
+{
+    Serial.print (F("Timeout waiting for left Limt... "));
+    MainActionControl.RightMagnetActivate();
+  
+} // endof RightMagnetActivateWrapperTimeout()
+
+// *****************************************************************************************
+//
+// ActivateMainMagnetWrapper()
 //
 // This is a wrapper function for the Magnet Control Class.  Wrapper was needed to the 
 // problems with the way Arduino handles callback functions.
 //
 // ****************************************************************************************
-void ActivateMainMagnet(void)
+void ActivateMainMagnetWrapper(void)
 {
-
     MainActionControl.ActivateMainMagnet();
   
-} // endof ActivateMainMagnet()
+} // endof ActivateMainMagnetWrapper()
 
 // *****************************************************************************************
 //
@@ -118,7 +139,7 @@ void ActivateMainMagnet(void)
 // *****************************************************************************************
 void DutyCycleTimer (void)
 {
-    MainActionControl.UpdateDutyCycleDownCount();
+    MainActionControl.UpdateDutyCycleInActiveWindow();
   
 } //endof DutyCycleTimer()
 

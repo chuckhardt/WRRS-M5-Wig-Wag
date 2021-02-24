@@ -146,48 +146,41 @@ void SerialPortType::SerialLoop(char cParseArgList[kMaxCommandsSupported][kMaxCo
                 // if we have been told so, then set the direction control relay to right
                 if(kMatch == strcmp(cParseArgList[1],"right"))
                 {
-                    Serial.println ("CMD: switch => right");
-                    
+                    Serial.println (F("CMD: switch => right"));
                 }
 
                 // if we have been told so, then set the direction control relay to left
                 else if(kMatch == strcmp(cParseArgList[1],"left"))
                 {
-                    Serial.println ("CMD: switch => left");
-                    
+                    Serial.println (F("CMD: switch => left"));
                 }
                 
-                // if we have been told so, then set the direction control relay to left
+                // if we have been told so, then set the complete WigWag Sequence
                 else if(kMatch == strcmp(cParseArgList[1],"user"))
                 {
-                    Serial.println ("CMD: switch => user");
-                    
+                    Serial.println (F("CMD: switch => user"));
                 }
-                
                 else
-                  Serial.println ("CMD: switch - ERROR");    
+                  Serial.println (F("CMD: switch - ERROR"));    
                
             }
             else if(kMatch == strcmp(cParseArgList[0],"cycle"))
             {
                 
-                Serial.print ("CMD: cycle => ");
+                Serial.print (F("CMD: cycle => "));
                 Serial.println( cParseArgList[1]);
- 
             }
             
             else if(kMatch == strcmp(cParseArgList[0],"help"))
             {
-                Serial.println ("help - this menu");
-                Serial.println ("  main       activate | deactivate");
-                Serial.println ("  switch     right | left | user");
-                Serial.println ("  cycle      [seconds]");
-                
+                Serial.println (F("help - this menu"));
+                Serial.println (F("  main       activate | deactivate"));
+                Serial.println (F("  switch     right | left | user"));
+                Serial.println (F("  cycle      [seconds]"));
             }
-            
             else
             {
-                Serial.print("ERROR, Invalid CMD: ");
+                Serial.print(F("ERROR, Invalid CMD: "));
                 Serial.println(sCommand);
             }
 

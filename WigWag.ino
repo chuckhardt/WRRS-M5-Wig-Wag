@@ -22,8 +22,13 @@
 #include "taskstate.h"
 
 Timer MainEventTimer;
+
+Timer LeftMagnetEventTimer;
+Timer RightMagnetEventTimer;
+
 int   giMainEventTimerID;
 int   giDutyCycleEventTimerID;
+int   giTestTimer;
 
 SerialPortType  SerialMain;
 MainMagnet      MainActionControl;
@@ -50,18 +55,19 @@ void setup()
 
   // Init all Arduino IO pins
   InitializeArduinoIOpins();
-  
-  // We are going to start the main loop event timer.
-  // Every time the timer expires, the TaskSwitchMain() function will be called.
-  giMainEventTimerID = MainEventTimer.every(25, TaskSwitchMain);
+  delay(1000);
 
-  // Every time the timer expires, the DutyCycleTimer() function will be called.
-  giDutyCycleEventTimerID = MainEventTimer.every(1000, DutyCycleTimer);
- 
+  Serial.println (F(" ********** WigWag Ver 1.0.6 ***********"));
+    
   // upon boot up, we are going to activate the signal
   MainActionControl.ActivateMainMagnet();
-  MainActionControl.RightMagnetActivate();
- 
+
+  // We are going to start the main loop event timer.
+  // Every time the timer expires, the TaskSwitchMain() function will be called.
+  giMainEventTimerID = MainEventTimer.every("Main", 30, TaskSwitchMain);
+
+  delay(1000);
+  
 }  //endof setup()
 
 // ***************************************************
@@ -78,6 +84,8 @@ void loop()
 {
     // we need to update the timer continiously
     MainEventTimer.update();
+    LeftMagnetEventTimer.update();
+    RightMagnetEventTimer.update();
     
 }  //endof loop()
 
@@ -102,17 +110,17 @@ void TaskSwitchMain()
     {
         case ReadUserInputRightLimit:  // read the right limit switch, if actuated, turn on the left magnet
          
-            RightLimitSwitch.ReadSwitch(cParseArgList, &LeftMagnetActivate );
+            RightLimitSwitch.ReadSwitch(cParseArgList, &LeftMagnetActivateWrapper );
             break;
             
         case ReadUserInputLeftLimit:  // read the left limit switch, if actuated, turn on the right magnet 
 
-            LeftLimitSwitch.ReadSwitch (cParseArgList, &RightMagnetActivate ); 
+            LeftLimitSwitch.ReadSwitch (cParseArgList, &RightMagnetActivateWrapper ); 
             break;
 
         case ReadUserInputUserSwitch:  // read the user input (start) switch, if actuated, turn on the main magnet.
               
-            UserInputSwitch.ReadSwitch (cParseArgList, &ActivateMainMagnet ); 
+            UserInputSwitch.ReadSwitch (cParseArgList, &ActivateMainMagnetWrapper ); 
             break;
       
         case CheckMainMagnet:         // check to see if we need to turn off the main magnet 
@@ -124,12 +132,15 @@ void TaskSwitchMain()
 
             SerialMain.SerialLoop(cParseArgList);
             LedFlash();
+ 
+            DutyCycleTimer();
+ 
             break;
 
         default:
             TaskStates++;
     }
-
-    TaskStates++;
-
+     
+    TaskStates++;  
+  
 }  //endof TaskSwitchMain()

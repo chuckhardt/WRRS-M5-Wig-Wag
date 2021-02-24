@@ -16,10 +16,15 @@
 #define MainControl_h
 
 #include "WigWag.h"
-
+#include "Timer.h"
 
 #define kMaxOperationalTimeLimt 30000
-#define kMaxWigWagDutyCycle 60
+#define kMaxWigWagDutyCycleInActiveDuration 600000
+
+
+#define RIGHT true
+#define LEFT  false
+
 
 // ****************************************************************************************
 //
@@ -36,9 +41,13 @@ class MainMagnet
         long mlExpirationTime;
         bool mbMainMagnetOn;
         bool mbMagnetDirection;   // stores the magnet diredtion, left or right
-        long mlDutyCycleTime;
+        long mlWigWagRestartInhibitTimeWindow;
         bool mbDownCountReached;
         long mlDutyCycleMaxTime;
+        Timer mDirectionTimer;
+        int   miLeftDirectionTimerID;
+        int   miRightDirectionTimerID;
+        
 
     public:
 
@@ -53,13 +62,13 @@ class MainMagnet
 
     // ****************************************************************************************
     //
-    // UpdateDutyCycleDownCount()
+    // UpdateDutyCycleInActiveWindow()
     //
     // When called our duty cycle down count is decremented.  When we hit 0, the WigWag
     // can be activated again.
     //
     // ****************************************************************************************
-    void UpdateDutyCycleDownCount(void);
+    void UpdateDutyCycleInActiveWindow(void);
     
     // ****************************************************************************************
     //
@@ -124,8 +133,6 @@ class MainMagnet
     // testing the callback function
     typedef void (MainMagnet::*callback_func_ptr)();
     callback_func_ptr cb_func;
-
-
 
 }; // endof MainMagnet
 
